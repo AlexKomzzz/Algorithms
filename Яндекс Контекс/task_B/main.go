@@ -20,6 +20,7 @@ func main() {
 	fmt.Fscan(in, &n)
 	fmt.Fscan(in, &k)
 
+	//start := time.Now()
 	// Создаем слайз в котором будем хранить номера карточек
 	NumbersSlice := make([]uint, n)
 
@@ -29,7 +30,17 @@ func main() {
 		fmt.Fscan(in, &NumberOnCard)
 
 		NumbersSlice[i] = NumberOnCard
+		/*
+			// Для проверки больших рандомных массивов
+			rand.Seed(time.Now().UnixNano())
+			NumbersSlice[i] = uint(rand.Intn(10000 + 1))*/
 	}
+
+	// Время создания массива
+	//duration1 := time.Since(start)
+
+	// Измерим начало работы
+	//start = time.Now()
 
 	// Создадим переменную, в которой будет записана максимальная сумма чисел из начала массива от 0 до k-1 (левая часть массива)
 	var MaxSum uint
@@ -38,6 +49,12 @@ func main() {
 	}
 
 	ResultSum := MaxSum
+
+	// Если k == n
+	if k == n {
+		fmt.Fprintln(out, ResultSum)
+		return
+	}
 
 	// Сдвигаем окно, уменьшая начало(левую часть), увеличия конец(правую часть).
 	// Из суммы вычитаем последний элемент из левой части и прибавляем новый элемент из правой
@@ -51,5 +68,10 @@ func main() {
 		}
 	}
 
+	//duration := time.Since(start)
+
 	fmt.Fprintln(out, ResultSum)
+	//fmt.Fprintln(out, duration1)
+	//fmt.Fprintln(out, duration)
+
 }
