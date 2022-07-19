@@ -25,7 +25,9 @@ func main() {
 	// Из чисел 1200 430 500 43200  получим мапу {00:{2:2 5:1} 30:{4:1}}, здесь три числа с 00 в конце и одно число с 30 в конце.
 	// Из чисел с 00 на конце определим числа с одинаковыми сотками: это 1200 и 43200(их два) - сотня 2; 500 - сотня равна 5 (только одно число)
 
-	TableEnd100 := make(map[uint8]map[int8]uint32)
+	// ПРИМЕЧАНИЕ. Вместо мап сделал слайсы
+
+	TableEnd100 := make([][]uint32, 100)
 
 	for i := uint32(0); i < n; i++ {
 
@@ -33,19 +35,22 @@ func main() {
 		var a uint32
 		fmt.Fscan(os.Stdin, &a)
 
-		if TableEnd100[uint8(a%100)] == nil {
-			TableEnd100[uint8(a%100)] = make(map[int8]uint32)
+		if TableEnd100[a%100] == nil {
+			TableEnd100[a%100] = make([]uint32, 10)
 		}
-		TableEnd100[uint8(a%100)][int8(a%1000/100)]++
+		TableEnd100[a%100][a%1000/100]++
 
 	}
 
 	// Рассмотрим каждый массив чисел с одинаковыми последними двумя разрядами
 	for _, Map100 := range TableEnd100 {
+		if Map100 == nil {
+			continue
+		}
 		// Перебираем ключи мапы 2, 6, 3, 7
-		keys := [4]int8{2, 6, 3, 7}
+		keys := [4]int{2, 6, 3, 7}
 		for _, key := range keys {
-			for j := int8(-2); j <= 2; j += 4 {
+			for j := -2; j <= 2; j += 4 {
 				if int32(Map100[key])-int32(Map100[key+j]) < 0 {
 					NumResult += Map100[key+j] - (Map100[key+j] - Map100[key])
 					Map100[key+j] = Map100[key+j] - Map100[key]

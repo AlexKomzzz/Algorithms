@@ -22,8 +22,8 @@ import (
 type Vertex struct {
 	neighbor   []int32
 	Value      uint32
-	verified   bool
 	LableStart bool
+	Count      int32
 }
 
 func main() {
@@ -59,30 +59,11 @@ func main() {
 
 			// Если это первый элемент пропускаем цикл
 			case i == 1 && j == 1:
-			//Если это верхний правый угол - добавляем соседа слева
-			case i == 1 && j == m:
-				//Если у вершины значение меньше чем у соседа слева, то добавим этого соседа, иначе предыдущей вершине добывим в соседи эту вершину
-				if val < VertexMap[((i-1)*m+j)-1].Value {
-					vertex.neighbor = append(vertex.neighbor, (i-1)*m+j-1)
-				} else {
-					// Если значение больше, чем у предыдущей вершины, добавим ей в соседи эту вершину
-					VertexBefore := VertexMap[((i-1)*m+j)-1]
-					VertexBefore.neighbor = append(VertexBefore.neighbor, (i-1)*m+j)
-					VertexMap[((i-1)*m+j)-1] = VertexBefore
-				}
-			//Если это нижний левый угол, проверяем верхего соседа. Если наше значение меньше, то добавляем его в соседи, если больше то к нему добавляем нашу вершину
-			case i == n && j == 1:
-				if val < VertexMap[((i-1)*m+j)-m].Value {
-					vertex.neighbor = append(vertex.neighbor, ((i-1)*m+j)-m)
-				} else {
-					VertexBefore := VertexMap[((i-1)*m+j)-m]
-					VertexBefore.neighbor = append(VertexBefore.neighbor, (i-1)*m+j)
-					VertexMap[((i-1)*m+j)-m] = VertexBefore
-				}
 			// Если элемент находится в первой строке рассмотрим только левого соседа
 			case i == 1:
 				if val < VertexMap[((i-1)*m+j)-1].Value {
 					vertex.neighbor = append(vertex.neighbor, (i-1)*m+j-1)
+				} else if val == VertexMap[((i-1)*m+j)-1].Value {
 				} else {
 					VertexBefore := VertexMap[((i-1)*m+j)-1]
 					VertexBefore.neighbor = append(VertexBefore.neighbor, (i-1)*m+j)
@@ -92,6 +73,7 @@ func main() {
 			case j == 1:
 				if val < VertexMap[((i-1)*m+j)-m].Value {
 					vertex.neighbor = append(vertex.neighbor, ((i-1)*m+j)-m)
+				} else if val == VertexMap[((i-1)*m+j)-m].Value {
 				} else {
 					VertexBefore := VertexMap[((i-1)*m+j)-m]
 					VertexBefore.neighbor = append(VertexBefore.neighbor, (i-1)*m+j)
@@ -101,6 +83,7 @@ func main() {
 			default:
 				if val < VertexMap[((i-1)*m+j)-1].Value {
 					vertex.neighbor = append(vertex.neighbor, (i-1)*m+j-1)
+				} else if val == VertexMap[((i-1)*m+j)-1].Value {
 				} else {
 					// Если значение больше, чем у предыдущей вершины, добавим ей в соседи эту вершину
 					VertexBefore := VertexMap[((i-1)*m+j)-1]
@@ -109,6 +92,7 @@ func main() {
 				}
 				if val < VertexMap[((i-1)*m+j)-m].Value {
 					vertex.neighbor = append(vertex.neighbor, ((i-1)*m+j)-m)
+				} else if val == VertexMap[((i-1)*m+j)-m].Value {
 				} else {
 					VertexBefore := VertexMap[((i-1)*m+j)-m]
 					VertexBefore.neighbor = append(VertexBefore.neighbor, (i-1)*m+j)
@@ -131,54 +115,97 @@ func main() {
 	// Создадим переменную для хранения максимального пути
 	var MaxLenght int32
 
-	// Для каждой вершины применяем поиск в глубину
-	for i := int32(1); i <= n; i++ {
-		for j := int32(1); j <= m; j++ {
+	// Для каждой вершины применяем поиск в ширину
+	for NumVertex, VertexByKey := range VertexMap {
+		//fmt.Println("Num vert: ", NumVertex)
+		//var MaxVertLable int32
 
-			// Если вершина помечена как пройденая, то ее пропускаем, т.к. она уже учавствовала в пути
-			if VertexMap[(i-1)*m+j].LableStart {
-				continue
-			}
+		// Если вершина помечена как пройденая, то ее пропускаем, т.к. она уже учавствовала в пути
+		if VertexByKey.LableStart {
+			continue
+		}
 
-			// Счетчик для счета пути
-			Count := int32(-1)
+		// Помечаем вершину как уже посчитанную в предыдущих разборах ребер
+		VertexByKey.LableStart = true
+		VertexMap[NumVertex] = VertexByKey
 
-			Lable := true
-			// при проходе вершины задать  verified = Lable, LableStart = true\
+		VertexByKey.Count = 1
 
-			VertexNow := VertexMap[(i-1)*m+j]
-			VertexNow.LableStart = true
-			VertexMap[(i-1)*m+j] = VertexNow
+		// Создадим очередь и добавим текущую вершину
+		S := list.New()
+		S.PushFront(VertexByKey)
 
-			// Создадим стек и добавим текущую вершину
-			S := list.New()
-			S.PushBack(VertexNow)
+		// Если очередь не пуста
+		for S.Len() != 0 {
 
-			// Если стек не пуст
-			for S.Len() != 0 {
-				Count++
-				//выталкиваем вершину из стека
-				VertexNext := S.Back().Value.(Vertex)
+			//выталкиваем вершину из очереди
+			VertexNext := S.Remove(S.Back()).(Vertex)
 
-				// Если вершина не изведана проходим по ее соседям
-				if !VertexNext.verified {
-					for _, neighbors := range VertexNext.neighbor {
-						VertexNeighbor := VertexMap[neighbors]
-						VertexNeighbor.LableStart = true
+			// Рассмотрим всех соседей
+			for _, neighbors := range VertexNext.neighbor {
+
+				VertexNeighbor := VertexMap[neighbors]
+
+				//fmt.Println("Vert count", VertexNeighbor.Count)
+
+				/*for _, numVert := range SliceVertex {
+					if neighbors == numVert {
+						VertexNeighbor.Count = VertexNext.Count + 1
+						fmt.Println("вновь берем вершину ", VertexNeighbor.Count)
 						VertexMap[neighbors] = VertexNeighbor
-						S.PushBack(VertexNeighbor)
+
+						// И добавляем в очередь
+						S.PushFront(VertexNeighbor)
+						continue
 					}
-					VertexNext.verified = Lable
 				}
 
+				// Проверяем, была ли пройдена вершина в предыдущих циклах
+				if VertexNeighbor.LableStart {
+					if MaxVertLable < VertexNeighbor.Count+VertexNext.Count {
+						MaxVertLable = VertexNeighbor.Count + VertexNext.Count
+					}
+					continue
+				}*/
+
+				// Прибавляем счетчик на один от родительского
+				VertexNeighbor.Count = VertexNext.Count + 1
+
+				VertexNeighbor.LableStart = true
+				VertexMap[neighbors] = VertexNeighbor
+
+				//SliceVertex = append(SliceVertex, neighbors)
+
+				// И добавляем в очередь
+				S.PushFront(VertexNeighbor)
+
 			}
 
-			if MaxLenght < Count {
-				MaxLenght = Count
+			// Если очередь пуста, значит мы дошли до последнего элемента
+			if S.Len() == 0 {
+				// Если максимальный путь, вычисленный ранним циклом, меньше, чем путь, найденный в этой итерации
+				/*if MaxVertLable < VertexNext.Count {
+					// то первоначальной вершине присвоим больший путь
+					VertexByKey.Count = VertexNext.Count
+				} else {
+					VertexByKey.Count = MaxVertLable
+				}
+				VertexMap[NumVertex] = VertexByKey
+
+				fmt.Println(MaxLenght, VertexByKey.Count)*/
+
+				// если наибольший путь меньше, чем у это вершины, значит это то что мы ищем
+				if MaxLenght < VertexNext.Count {
+					MaxLenght = VertexNext.Count
+				}
+
+				//fmt.Println("max len", MaxLenght)
 			}
 
 		}
+
 	}
 
 	fmt.Println(MaxLenght)
+	//fmt.Println(VertexMap)
 }
