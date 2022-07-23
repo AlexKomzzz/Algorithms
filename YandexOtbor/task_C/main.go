@@ -51,6 +51,22 @@ func SimpleNum(X int) bool {
 	return prime
 }
 
+func SearchX(num, oldNOD int, i *int) int {
+	// if num1%NOD(num1, num2) == 0 ????
+	X := num / oldNOD
+	*i++
+	iOk := false
+	for iOk {
+		if num%*i == 0 {
+			iOk = true
+		} else {
+			*i++
+		}
+	}
+
+	return X
+}
+
 func main() {
 	var tasks uint8
 	fmt.Fscan(os.Stdin, &tasks)
@@ -77,36 +93,16 @@ func main() {
 		var X int = 2
 		var i, j int = 1, 1
 
+		// Поиск числа на которое нужно увеличить начальное число
 		for {
-			//for k := 0; k < 4; k++ {
-			//fmt.Printf("num1 = %d, num2 = %d\n", num1, num2)
-			//fmt.Println("NOD = ", NOD(num1, num2))
 
-			if num1 > num2 {
+			if num1 > num2 || (num1 == num2 && i <= j) {
 
-				// if num1%NOD(num1, num2) == 0 ????
-				X = num1 / oldNOD
-				i++
-				iOk := false
-				for iOk {
-					if num1%i == 0 {
-						iOk = true
-					} else {
-						i++
-					}
-				}
+				X = SearchX(num1, oldNOD, &i)
+
 			} else if num1 < num2 {
-				// if num2%NOD(num1, num2) == 0 ????
-				X = num2 / oldNOD
-				j++
-				jOk := false
-				for jOk {
-					if num2%j == 0 {
-						jOk = true
-					} else {
-						j++
-					}
-				}
+
+				X = SearchX(num2, oldNOD, &j)
 			}
 			// if num1 == num2 ???
 
@@ -115,13 +111,11 @@ func main() {
 				break
 			}
 
-			if A/i > num2 {
+			if A/i > num2 || (A/i == num2 && i <= j) {
 				num1 = A / i
 			} else {
 				num2 = B / j
 			}
-			// if num1 == num2 ????
-
 		}
 
 		NOD1 := NOD(A*X, B)
@@ -130,9 +124,7 @@ func main() {
 			Result = append(Result, NOD1)
 		} else {
 			Result = append(Result, NOD2)
-
 		}
-
 	}
 
 	for _, ResultNODs := range Result {
