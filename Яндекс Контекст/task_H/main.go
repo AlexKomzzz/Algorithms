@@ -6,38 +6,73 @@
 
 package main
 
+// При решении это задачи используем такую структуру данных, как куча.
+// 1. Создаем кучу из всех элементов
+// 2. Извлекаем два минимальных элемента из кучи
+// 3. Их сумму запоминаем и вставляем в кучу
+// 4. Повторяем пункт 2, пока в куче не останется элементов
+
 import (
+	"container/heap"
 	"fmt"
-	"math/big"
 	"os"
-	"sort"
 )
+
+// IntHeap это минимальная куча целых чисел.
+type IntHeap []int
+
+// Len, Less, Swap для реализации интерфейса sort.Interface
+func (h IntHeap) Len() int           { return len(h) }
+func (h IntHeap) Less(i, j int) bool { return h[i] < h[j] }
+func (h IntHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+
+func (h *IntHeap) Push(x interface{}) {
+	// Push и Pop используют приемники указателей,
+	// потому что они изменяют длину среза,
+	// не только его содержимое.
+	*h = append(*h, x.(int))
+}
+
+func (h *IntHeap) Pop() interface{} {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[0 : n-1]
+	return x
+}
 
 func main() {
 
 	var amount int
 	fmt.Fscan(os.Stdin, &amount)
 
-	BunchSlice := make([]*big.Int, amount)
+	MyHeap := &IntHeap{}
 
+	// Заполним кучу
 	for n := 0; n < amount; n++ {
-		var bunch int64
+		var bunch int
 		fmt.Fscan(os.Stdin, &bunch)
 
-		BunchSlice[n] = big.NewInt(bunch)
+		heap.Push(MyHeap, bunch)
 	}
 
-	// сортируем кучи по неубываю весов
-	sort.Slice(BunchSlice, func(i int, j int) bool { return BunchSlice[i].Int64() <= BunchSlice[j].Int64() })
+	// Переменная для хранения затраченной энергии
+	var Energy int
 
-	bunchNew := big.NewInt(0)
+	for n := 0; n < amount-1; n++ {
 
-	for n := 1; n < amount; n++ {
+		// Извлекаем два минимальных числа
+		NewEnergy := heap.Pop(MyHeap).(int) + heap.Pop(MyHeap).(int)
+		Energy += NewEnergy
 
-		sum := big.NewInt(0)
-		bunchNew.Add(bunchNew, sum.Add(BunchSlice[n], BunchSlice[n-1]))
-		BunchSlice[n] = bunchNew
+		// Выход из цикла, если куча пустая
+		//if MyHeap.Len() == 0 {
+		//	break
+		//}
+
+		// Их сумму добавляем в кучу
+		heap.Push(MyHeap, NewEnergy)
 	}
 
-	fmt.Print(bunchNew.Uint64())
+	fmt.Print(Energy)
 }
