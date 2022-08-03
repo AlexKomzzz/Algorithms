@@ -30,6 +30,7 @@ func main() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
+	// храним координаты букв, которые будут центром ромба
 	SliseCentr := make([]Centr, 0)
 
 	var n, m int8
@@ -53,12 +54,12 @@ func main() {
 	Reflection(SliseCentr, n, m)
 
 	// Создаем поле
-	//column := make([]string, m)
 	field := make([][]string, n)
 	for i := int8(0); i < n; i++ {
 		field[i] = make([]string, m)
 	}
 
+	// Создадим массивы, чтобы создать ромб вокруг буквы
 	dx := [6]int8{1, 1, 1, 0, 0, -1}
 	dy := [6]int8{-1, 0, 1, -1, 1, 0}
 	dval := [6]string{"\\", "_", "/", "/", "\\", "_"}

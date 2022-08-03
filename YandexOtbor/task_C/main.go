@@ -11,6 +11,7 @@ package main
 // Если является, вывести НОД при значении Х
 
 import (
+	"bufio"
 	"fmt"
 	"math"
 	"os"
@@ -49,7 +50,7 @@ func SearchX(num, oldNOD int, i *int) int {
 	return X
 }
 
-// Проверка на простое число
+// Фун-ия поиска наибольшего числа для умножения и его проверка на простое число
 func SimpleNum(i *int, num, oldNOD int) bool {
 	prime := true
 	X := SearchX(num, oldNOD, i)
@@ -69,10 +70,11 @@ func SimpleNum(i *int, num, oldNOD int) bool {
 }
 
 func main() {
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
 	var tasks uint8
 	fmt.Fscan(os.Stdin, &tasks)
-
-	Result := make([]int, 0)
 
 	for T := uint8(0); T < tasks; T++ {
 
@@ -81,12 +83,14 @@ func main() {
 		fmt.Fscan(os.Stdin, &A)
 		fmt.Fscan(os.Stdin, &B)
 
-		var num, ResultNOD int
+		var num int
 		var l *int
+		// Создадим счетчики на которые будем делить А и В для нахождения наибольшего делителя
 		var i, j int = 1, 1
+		var ok bool
 
 		// Поиск числа на которое нужно увеличить начальное число
-		for {
+		for !ok {
 
 			if A/i > B/j || (A/i == B/j && i <= j) {
 				num = A / i
@@ -96,16 +100,8 @@ func main() {
 				l = &j
 			}
 
-			ResultNOD = num
-			if ok := SimpleNum(l, num, NOD(A, B)); ok {
-				Result = append(Result, ResultNOD)
-				break
-			}
+			ok = SimpleNum(l, num, NOD(A, B))
 		}
+		fmt.Fprintln(out, num)
 	}
-
-	for _, NOD := range Result {
-		fmt.Println(NOD)
-	}
-
 }
