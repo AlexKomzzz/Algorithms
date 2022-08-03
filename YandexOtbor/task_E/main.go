@@ -15,18 +15,25 @@ func main() {
 	fmt.Fscan(os.Stdin, &amount)
 
 	// Слайз в котором храним прямоугольники
-	RectangleSlice := make([]Rectangle, amount)
+	RectangleSlice := make([]*Rectangle, amount)
 
 	// Сохраним все координаты прямоугольников
 	for n := int32(0); n < amount; n++ {
-		var x1, y1, x2, y2 int32
-		fmt.Fscan(os.Stdin, &x1, &y1, &x2, &y2)
+		var X1, Y1, X2, Y2 int32
+		fmt.Fscan(os.Stdin, &X1, &Y1, &X2, &Y2)
 
-		RectangleSlice[n].x1 = x1
+		RectangleSlice[n] = &Rectangle{x1: X1,
+			y1:     Y1,
+			x2:     X2,
+			y2:     Y2,
+			number: n + 1,
+		}
+
+		/*RectangleSlice[n].x1 = x1
 		RectangleSlice[n].y1 = y1
 		RectangleSlice[n].x2 = x2
 		RectangleSlice[n].y2 = y2
-		RectangleSlice[n].number = n + 1
+		RectangleSlice[n].number = n + 1*/
 	}
 
 	// условия для определения пересекаемости прямоугольников (* - координата второго прямоугольника)
@@ -44,6 +51,7 @@ func main() {
 
 		// Будем рассматривать только ту часть слайса, где у прямоугольников х2 больше или равно х1 текущего прямоугольника
 		start := sort.Search(len(NewSlice), func(i int) bool { return NewSlice[i].x2 >= rectangle.x1 })
+
 		NewRectangleSlice := NewSlice[start:]
 
 		for l, AnotherRectangle := range NewRectangleSlice {
@@ -63,7 +71,7 @@ func main() {
 	sort.Slice(RectangleSlice, func(i, j int) bool { return RectangleSlice[i].number < RectangleSlice[j].number })
 
 	for i := range RectangleSlice {
-		fmt.Println(RectangleSlice[i].intersections)
+		fmt.Print(RectangleSlice[i].intersections, " ")
 	}
 
 }

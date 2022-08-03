@@ -32,10 +32,11 @@ func main() {
 		var Result int32 = -1
 
 		// Считаем каждое число последовательно в виде байт
-		// 0-48   1-49
+		// 0-48   1-49 и тд.
 		NewNum := Numbers[N-1]
 
 		if NewNum == 48 {
+			// если это 0, увеличиваем счетчик нулей
 			SliceNum[N].Count0++
 			for i := int32(1); i < N; i++ {
 				SliceNum[i].Count0++
@@ -45,6 +46,7 @@ func main() {
 				}
 			}
 		} else {
+			// если это 1, то увеличиваем счетчик единиц
 			SliceNum[N].Count1++
 			for i := int32(1); i < N; i++ {
 				SliceNum[i].Count1++
